@@ -54,8 +54,6 @@ export class SheetShowComponent implements OnInit {
         columns: headers,
         rows: rows,
       } as CSVTableFormat;
-
-      console.log(this.table);
     };
     reader.readAsText(data);
   }
