@@ -3,3 +3,6 @@ frontend/build/
 frontend/.vscode/
 frontend/.angular/
 backend/venv/
+backend/__pycache__/
+backend/uploads/
+train.csv

@@ -1,6 +1,19 @@
-<input
-  type="file"
-  (change)="onFileSelected($event)"
-  accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-/>
-<button (click)="onUpload($event)" [disabled]="!selectedFile">Upload</button>
+<p-fileupload
+  name="sheetUploader"
+  [customUpload]="true"
+  (uploadHandler)="onUpload($event)"
+  [multiple]="true"
+  accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, text/csv"
+  mode="advanced"
+>
+  <ng-template #empty>
+    <div>Drag and drop files to here to upload.</div>
+  </ng-template>
+  <ng-template #content>
+    <ul *ngIf="uploadedFiles.length">
+      <li *ngFor="let file of uploadedFiles">
+        {{ file.name }} - {{ file.size }} bytes
+      </li>
+    </ul>
+  </ng-template>
+</p-fileupload>

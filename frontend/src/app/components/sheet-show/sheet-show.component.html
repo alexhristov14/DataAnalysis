@@ -1,0 +1,33 @@
+<!-- <p-table [value]="products" [tableStyle]="{ 'min-width': '50rem' }">
+  <ng-template #header>
+    <tr>
+      <th>Code</th>
+      <th>Name</th>
+      <th>Category</th>
+      <th>Quantity</th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-product>
+    <tr>
+      <td>{{ product.code }}</td>
+      <td>{{ product.name }}</td>
+      <td>{{ product.category }}</td>
+      <td>{{ product.quantity }}</td>
+    </tr>
+  </ng-template>
+</p-table> -->
+
+@for (table of tables; track $index) {
+<p-table [value]="table" [tableStyle]="{ 'min-width': '50rem' }">
+  <ng-template #header>
+    <tr>
+      <th *ngFor="let column of table.columns">{{ column }}</th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-row>
+    <tr *ngFor="let cell of row">
+      <td>{{ cell }}</td>
+    </tr>
+  </ng-template>
+</p-table>
+}

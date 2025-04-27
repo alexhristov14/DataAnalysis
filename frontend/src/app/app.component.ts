@@ -1,10 +1,28 @@
 import { Component } from '@angular/core';
 import { FileUploaderComponent } from './components/file-uploader/file-uploader.component';
+import { Button } from 'primeng/button';
+import { ChartComponent } from './components/chart/chart.component';
+import { DataMenuComponent } from './components/data-menu/data-menu.component';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
-  imports: [FileUploaderComponent],
+  imports: [DataMenuComponent, RouterOutlet],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
-export class AppComponent {}
+export class AppComponent {
+  isDarkMode: boolean = false;
+
+  toggleDarkMode() {
+    const element = document.querySelector('html');
+    if (element) {
+      if (this.isDarkMode) {
+        element.classList.remove('dark-mode');
+      } else {
+        element.classList.add('dark-mode');
+      }
+      this.isDarkMode = !this.isDarkMode;
+    }
+  }
+}

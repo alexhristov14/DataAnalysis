@@ -1,46 +1,49 @@
 import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { FileUploadHandlerEvent, FileUploadModule } from 'primeng/fileupload';
+import { CommonModule } from '@angular/common';
+import { SharedDataService } from '../../services/api-handler/shared-data.service';
 
 @Component({
   selector: 'app-file-uploader',
   templateUrl: './file-uploader.component.html',
   styleUrls: ['./file-uploader.component.scss'],
+  imports: [FileUploadModule, CommonModule],
 })
 export class FileUploaderComponent {
-  selectedFile: File | null = null;
+  uploadedFiles: File[] = [];
   validTypes: string[] = [
     'text/csv',
     'application/vnd.ms-excel',
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   ];
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private sharedDataService: SharedDataService<File>
+  ) {}
 
-  onUpload(event: Event) {
-    if (!this.selectedFile) return;
+  onUpload(event: FileUploadHandlerEvent) {
+    const files: File[] = event.files;
 
-    if (!this.validTypes.includes(this.selectedFile.type)) {
-      alert('Invalid file type. Please upload a CSV or Excel file.');
-      this.selectedFile = null;
-      return;
-    }
+    for (let file of files) {
+      if (!this.validTypes.includes(file.type)) {
+        alert('Invalid file type: ' + file.name);
+        continue;
+      }
 
-    const formData = new FormData();
-    formData.append('file', this.selectedFile);
+      const formData = new FormData();
+      formData.append('file', file);
 
-    this.http
-      .post('http://localhost:8000/api/upload', formData)
-      .subscribe(() => {
-        console.log('File uploaded successfully');
-      });
-  }
+      this.http
+        .post('http://localhost:8000/api/upload', formData)
+        .subscribe(() => {
+          console.log('File uploaded successfully: ' + file.name);
+        });
 
-  onFileSelected(event: Event) {
-    const element = event.currentTarget as HTMLInputElement;
-    if (element.files && element.files.length > 0) {
-      this.selectedFile = element.files[0];
-    } else {
-      this.selectedFile = null;
+      this.sharedDataService.setData(file);
+
+      this.uploadedFiles.push(file);
     }
   }
 }
