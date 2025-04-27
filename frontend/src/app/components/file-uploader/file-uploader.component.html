@@ -1,0 +1,6 @@
+<input
+  type="file"
+  (change)="onFileSelected($event)"
+  accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+/>
+<button (click)="onUpload($event)" [disabled]="!selectedFile">Upload</button>
