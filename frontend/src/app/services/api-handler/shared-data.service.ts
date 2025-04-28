@@ -15,11 +15,46 @@ export class SharedDataService<T> {
   private formattedData = new BehaviorSubject<T | null>(null);
   formattedData$ = this.formattedData.asObservable();
 
+  private table: CSVTableFormat | null = null;
+
   setData(data: T): void {
     this.dataSubject.next(data);
   }
 
   getData(): T | null {
     return this.dataSubject.getValue();
+  }
+
+  getFormattedData(): CSVTableFormat | null {
+    const reader = new FileReader();
+    this.data$.subscribe((data) => {
+      if (data instanceof File) {
+        reader.onload = (e) => {
+          const csvData = (e.target?.result as string)
+            .split('\n')
+            .map((row) => {
+              return row.split(',');
+            });
+
+          const headers = csvData[0];
+          const rows = csvData.slice(1).map((row) => {
+            const obj: any = {};
+            headers.forEach((header, index) => {
+              obj[header] = row[index];
+            });
+            return obj;
+          });
+
+          this.table = {
+            name: (data as any).name || 'Unknown',
+            columns: headers,
+            rows: rows,
+          } as CSVTableFormat;
+        };
+        reader.readAsText(data);
+      }
+    });
+
+    return this.table;
   }
 }

@@ -1,4 +1,4 @@
-import { Component, Input, SimpleChange, SimpleChanges } from '@angular/core';
+import { Component, Input, SimpleChanges } from '@angular/core';
 import { ChartOptions, ChartType, ChartData } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 
@@ -6,59 +6,48 @@ import { BaseChartDirective } from 'ng2-charts';
   selector: 'app-chart',
   templateUrl: './chart.component.html',
   styleUrls: ['./chart.component.scss'],
+  standalone: true,
   imports: [BaseChartDirective],
 })
 export class ChartComponent {
-  @Input() inputLabels: string[] = ['Label 1', 'Label 2', 'Label 3'];
-  @Input() inputData: number[] = [10, 20, 30];
-  @Input() inputColors: string[] = ['#FF6384', '#36A2EB', '#FFCE56'];
-  @Input() inputType: string = 'bar';
-  @Input() inputTitle: string = 'Main Title';
+  @Input() inputType: ChartType = 'bar';
+  @Input() inputLabels: string[] = [];
+  @Input() inputData: number[] = [];
+  @Input() inputColors: string[] = [];
+  @Input() inputTitle: string = '';
+  @Input() inputOptions: ChartOptions = { responsive: true };
+  @Input() inputXLabel: string = 'X-Axis';
+  @Input() inputYLabel: string = 'Y-Axis';
 
-  type: ChartType = this.inputType as ChartType;
-  options: ChartOptions = {
-    responsive: true,
-  };
-
-  data: ChartData<'line'> = {
-    labels: this.inputLabels,
-    datasets: [
-      {
-        label: this.inputTitle,
-        data: this.inputData,
-        backgroundColor: this.inputColors,
-      },
-    ],
-  };
+  type: ChartType = 'bar';
+  data!: ChartData;
+  options!: ChartOptions;
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['inputLabels']) {
-      this.data.labels = changes['inputLabels'].currentValue;
-    }
-    if (changes['inputData']) {
-      this.data.datasets[0].data = changes['inputData'].currentValue;
-    }
-    if (changes['inputColors']) {
-      this.data.datasets[0].backgroundColor =
-        changes['inputColors'].currentValue;
-    }
-    if (changes['inputType']) {
-      this.type = changes['inputType'].currentValue as ChartType;
-      this.data.datasets[0].tension = 0.4;
-    }
-    if (changes['inputTitle']) {
-      this.data.datasets[0].label = changes['inputTitle'].currentValue;
-    }
+    this.updateChart();
   }
 
-  private updateChartData(): void {
+  private updateChart() {
+    this.type = this.inputType;
+    this.options = this.inputOptions;
+
     this.data = {
-      labels: this.inputLabels,
+      labels: this.inputLabels.length ? this.inputLabels : undefined,
       datasets: [
         {
-          label: this.inputTitle,
+          label: this.inputTitle || 'My Chart',
           data: this.inputData,
-          backgroundColor: this.inputColors,
+          backgroundColor: this.inputColors.length
+            ? this.inputColors
+            : ['#FF6384', '#36A2EB', '#FFCE56'],
+          tension: this.inputType === 'line' ? 0.4 : undefined,
+          borderColor:
+            this.inputType === 'line'
+              ? this.inputColors.length
+                ? this.inputColors
+                : ['#36A2EB']
+              : undefined,
+          fill: this.inputType === 'line' ? false : undefined,
         },
       ],
     };
