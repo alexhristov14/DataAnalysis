@@ -24,8 +24,8 @@ def correlation_matrix(df: pd.DataFrame) -> pd.DataFrame:
 def missing_values_summary(df: pd.DataFrame) -> pd.DataFrame:
     """Generate a summary of missing values in the DataFrame."""
     missing_values = df.isnull().sum()
-    missing_summary = pd.DataFrame(missing_values, columns=['Missing Values'])
-    missing_summary['Percentage'] = (missing_summary['Missing Values'] / len(df)) * 100
+    missing_summary = pd.DataFrame(missing_values, columns=['MissingValues'])
+    missing_summary['Percentage'] = (missing_summary['MissingValues'] / len(df)) * 100
     return missing_summary.reset_index().rename(columns={'index': 'Feature'})
 
 def data_types_summary(df: pd.DataFrame) -> pd.DataFrame:
