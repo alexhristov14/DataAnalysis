@@ -1,10 +1,7 @@
 import { Component } from '@angular/core';
-import { FileUploaderComponent } from './components/file-uploader/file-uploader.component';
-import { Button } from 'primeng/button';
-import { ChartComponent } from './components/chart/chart.component';
 import { DataMenuComponent } from './components/data-menu/data-menu.component';
 import { RouterOutlet } from '@angular/router';
-
+import { HttpClient } from '@angular/common/http';
 @Component({
   selector: 'app-root',
   imports: [DataMenuComponent, RouterOutlet],
@@ -13,6 +10,16 @@ import { RouterOutlet } from '@angular/router';
 })
 export class AppComponent {
   isDarkMode: boolean = false;
+
+  constructor(private http: HttpClient) {}
+
+  ngOnInit() {
+    this.http
+      .get('http://localhost:8000/api/uploads/train.csv')
+      .subscribe((data) => {
+        console.log('Data from API:', data);
+      });
+  }
 
   toggleDarkMode() {
     const element = document.querySelector('html');

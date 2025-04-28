@@ -1,0 +1,67 @@
+import pandas as pd
+
+def load_data(file_path: str) -> pd.DataFrame:
+    """Load data from a CSV file into a DataFrame."""
+    try:
+        df = pd.read_csv(file_path)
+        return df
+    except Exception as e:
+        print(f"Error loading data: {e}")
+        return pd.DataFrame()
+    
+def five_number_summary(df: pd.DataFrame) -> pd.DataFrame:
+    """Generate a five-number summary for each column in the DataFrame."""
+    summary = df.describe().T[['min', '25%', '50%', '75%', 'max']]
+    summary.columns = ['Min', 'Q1', 'Median', 'Q3', 'Max']
+    return summary.reset_index().rename(columns={'index': 'Feature'})
+
+def correlation_matrix(df: pd.DataFrame) -> pd.DataFrame:
+    """Generate a correlation matrix for the DataFrame."""
+    numeric_df = df.select_dtypes(include=['int64', 'float64'])
+    corr = numeric_df.corr()
+    return corr.reset_index().rename(columns={'index': 'Feature'})
+
+def missing_values_summary(df: pd.DataFrame) -> pd.DataFrame:
+    """Generate a summary of missing values in the DataFrame."""
+    missing_values = df.isnull().sum()
+    missing_summary = pd.DataFrame(missing_values, columns=['Missing Values'])
+    missing_summary['Percentage'] = (missing_summary['Missing Values'] / len(df)) * 100
+    return missing_summary.reset_index().rename(columns={'index': 'Feature'})
+
+def data_types_summary(df: pd.DataFrame) -> pd.DataFrame:
+    """Generate a summary of data types in the DataFrame."""
+    data_types = df.dtypes.reset_index()
+    data_types.columns = ['Feature', 'Data Type']
+    return data_types
+
+
+def unique_values_summary(df: pd.DataFrame) -> pd.DataFrame:
+    """Generate a summary of unique values in the DataFrame."""
+    unique_values = df.nunique()
+    unique_summary = pd.DataFrame(unique_values, columns=['Unique Values'])
+    return unique_summary.reset_index().rename(columns={'index': 'Feature'})
+
+def categorical_summary(df: pd.DataFrame) -> pd.DataFrame:
+    """Generate a summary of categorical features in the DataFrame."""
+    categorical_features = df.select_dtypes(include=['object', 'category']).columns
+    categorical_summary = pd.DataFrame(columns=['Feature', 'Unique Values'])
+    
+    for feature in categorical_features:
+        unique_values = df[feature].unique()
+        categorical_summary = categorical_summary.append({'Feature': feature, 'Unique Values': unique_values}, ignore_index=True)
+    
+    return categorical_summary
+
+def numerical_summary(df: pd.DataFrame) -> pd.DataFrame:
+    """Generate a summary of numerical features in the DataFrame."""
+    numerical_features = df.select_dtypes(include=['int64', 'float64']).columns
+    numerical_summary = pd.DataFrame(columns=['Feature', 'Mean', 'Std', 'Min', 'Max'])
+    
+    for feature in numerical_features:
+        mean = df[feature].mean()
+        std = df[feature].std()
+        min_val = df[feature].min()
+        max_val = df[feature].max()
+        numerical_summary = numerical_summary.append({'Feature': feature, 'Mean': mean, 'Std': std, 'Min': min_val, 'Max': max_val}, ignore_index=True)
+    
+    return numerical_summary
