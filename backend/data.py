@@ -1,4 +1,5 @@
 import pandas as pd
+from typing import List
 
 def load_data(file_path: str) -> pd.DataFrame:
     """Load data from a CSV file into a DataFrame."""
@@ -8,6 +9,9 @@ def load_data(file_path: str) -> pd.DataFrame:
     except Exception as e:
         print(f"Error loading data: {e}")
         return pd.DataFrame()
+    
+def get_features(df: pd.DataFrame) -> List[str]:
+    return list(df.columns)
     
 def five_number_summary(df: pd.DataFrame) -> pd.DataFrame:
     """Generate a five-number summary for each column in the DataFrame."""

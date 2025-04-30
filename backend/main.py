@@ -2,7 +2,7 @@ from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import shutil
-from data import load_data, five_number_summary, correlation_matrix, missing_values_summary, data_types_summary, unique_values_summary, categorical_summary, numerical_summary
+from data import load_data, five_number_summary, get_features, correlation_matrix, missing_values_summary, data_types_summary, unique_values_summary, categorical_summary, numerical_summary
 
 app = FastAPI()
 
@@ -32,6 +32,7 @@ async def get_file(filename: str):
         if df.empty:
             return JSONResponse(content={"error": "File is empty or not found"}, status_code=404)
     
+        features = get_features(df)
         five_num_summary = five_number_summary(df).to_dict(orient="records")
         correlation = correlation_matrix(df).to_dict(orient="records")
         missing_values = missing_values_summary(df).to_dict(orient="records")
@@ -41,6 +42,7 @@ async def get_file(filename: str):
         # numerical = numerical_summary(df).to_dict(orient="records")
 
         return JSONResponse(content={
+            "features": features,
             "five_number_summary": five_num_summary,
             "correlation": correlation,
             "missing_values": missing_values,

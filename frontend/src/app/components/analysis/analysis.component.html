@@ -1,19 +1,29 @@
-<div style="display: flex">
-  <p-card [style]="{ margin: '2rem' }">
-    <p-select
-      [style]="{ margin: '0 0 1rem 0' }"
-      [options]="features"
-      [(ngModel)]="selectedFeature"
-      optionLabel="name"
-      placeholder="Select a Feature"
-      class="w-full md:w-56"
-    />
-    <p-steps
-      [model]="items"
-      [readonly]="false"
-      [activeIndex]="activeIndex"
-      (activeIndexChange)="onActiveIndexChange($event)"
-    >
-    </p-steps>
+@if (metadata) {
+<div id="metadata-card">
+  <p-card header="Meta Data">
+    <ng-container>
+      <p-table [value]="metadata">
+        <ng-template #body>
+          <tr>
+            <td class="metadata-key">{{ "name" | uppercase }}</td>
+            <td>{{ metadata[0].name }}</td>
+          </tr>
+          <tr>
+            <td class="metadata-key">{{ "size" | uppercase }}</td>
+            <td>{{ metadata[0].size }}</td>
+          </tr>
+          <tr>
+            <td class="metadata-key">{{ "type" | uppercase }}</td>
+            <td>{{ metadata[0].type }}</td>
+          </tr>
+          <tr>
+            <td class="metadata-key">{{ "num_variables" | uppercase }}</td>
+            <td>{{ metadata[0].num_of_variables }}</td>
+          </tr>
+          <tr></tr>
+        </ng-template>
+      </p-table>
+    </ng-container>
   </p-card>
 </div>
+}
