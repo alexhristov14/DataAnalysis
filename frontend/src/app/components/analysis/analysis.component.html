@@ -27,3 +27,15 @@
   </p-card>
 </div>
 }
+
+<p-card header="Missing Values" [style]="{ margin: '2rem' }">
+  <p-select
+    [options]="features"
+    [(ngModel)]="selectedFeature"
+    placeholder="Select a Feature"
+  >
+    <p-table [value]="featuredata">
+      <ng-template #body></ng-template>
+    </p-table>
+  </p-select>
+</p-card>

@@ -5,4 +5,5 @@ frontend/.angular/
 backend/venv/
 backend/__pycache__/
 backend/uploads/
+backend/testing.py
 train.csv

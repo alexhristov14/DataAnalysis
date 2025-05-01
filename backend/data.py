@@ -69,3 +69,20 @@ def numerical_summary(df: pd.DataFrame) -> pd.DataFrame:
         numerical_summary = numerical_summary.append({'Feature': feature, 'Mean': mean, 'Std': std, 'Min': min_val, 'Max': max_val}, ignore_index=True)
     
     return numerical_summary
+
+def generate_feature_analysis_data(df: pd.DataFrame, feature: str) -> pd.DataFrame:
+    df = df[feature]
+    result = pd.DataFrame(data={
+        'distinct': len(df.unique()),
+        'distinct_percent': (len(df.unique()) / len(df)) + "%",
+        'mssing': len(df[df.isna()]),
+        'missing_percent': (len(df[df.isna()]) / len(df))+"%",
+        'maximum': df.max(),
+        'minimum': df.min(),
+        'median': df.median(),
+        'q1': df.quantile(0.25),
+        'q3': df.quantile(0.75),
+        'mean': df.mean(),
+    })
+
+    return result
