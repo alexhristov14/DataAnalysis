@@ -90,5 +90,10 @@ def generate_feature_analysis_data(df: pd.DataFrame, feature: str) -> pd.DataFra
 def get_feature_data_method(df: pd.DataFrame, feature: str, data: str) -> pd.DataFrame:
     if data == 'unique':
         result = pd.DataFrame(df[feature].value_counts())
-        print(result)
+        return result
+    
+    elif data == 'missing':
+        missing_count = df[feature].isna().sum()
+        not_missing_count = df[feature].notna().sum()
+        result = {"missing": int(missing_count), "not_missing": int(not_missing_count)}
         return result

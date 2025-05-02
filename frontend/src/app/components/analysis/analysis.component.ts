@@ -19,7 +19,7 @@ import { StepsModule } from 'primeng/steps';
 import { TableModule } from 'primeng/table';
 import { ChartModule } from 'primeng/chart';
 
-interface metaData {
+interface MetaData {
   name: string;
   size: number;
   type: string;
@@ -30,6 +30,7 @@ interface metaData {
   selector: 'app-analysis',
   templateUrl: './analysis.component.html',
   styleUrls: ['./analysis.component.scss'],
+  standalone: true,
   imports: [
     SelectModule,
     CardModule,
@@ -41,20 +42,23 @@ interface metaData {
   ],
 })
 export class AnalysisComponent implements AfterViewInit {
-  metadata: metaData[] = [];
+  metadata: MetaData[] = [];
   featureDataKeys: string[] = [];
   featureDataValues: any[] = [];
-  platformId = inject(PLATFORM_ID);
 
-  chart_data: any;
-  chart_data_labels: any;
-  chart_data_dataset: any;
-  options: any;
+  chartData: any;
+  chartOptions: any;
+
+  missingChartData: any;
+  missingChartOptions: any;
+
+  platformId = inject(PLATFORM_ID);
 
   @Input() features: string[] = [];
   @Input() selectedFeature: string = '';
 
-  filedata: File | undefined;
+  filedata?: File;
+  fileName: string = 'train.csv';
 
   constructor(
     private SDS: SharedDataService<File>,
@@ -62,138 +66,119 @@ export class AnalysisComponent implements AfterViewInit {
     private cdr: ChangeDetectorRef
   ) {}
 
-  ngAfterViewInit() {
+  ngAfterViewInit(): void {
     this.SDS.data$.subscribe((data) => {
       if (data) {
         this.filedata = data;
-        this.tryPushMetadata();
+        this.fileName = data.name;
+        this.loadFeatureList();
+        this.pushMetadata();
       }
     });
+  }
 
+  private loadFeatureList(): void {
     this.http
-      .get<any>('http://localhost:8000/api/uploads/train.csv')
+      .get<any>(`http://localhost:8000/api/uploads/${this.fileName}`)
       .subscribe({
-        next: (response) => {
-          this.features = response.features;
+        next: (res) => {
+          this.features = res.features;
           this.selectedFeature = this.features[0];
-          this.tryPushMetadata();
+          this.pushMetadata();
         },
-        error: (error) => {
-          console.error('Error fetching data:', error);
-        },
+        error: (err) => console.error('Feature list error', err),
       });
   }
 
-  updateFeatureData() {
-    const api_url = `http://localhost:8000/api/feature_data/train.csv/`;
-    this.http.get<any>(`${api_url + this.selectedFeature}`).subscribe({
-      next: (response) => {
-        const data = response.feature_data[0];
+  updateFeatureData(): void {
+    const base = `http://localhost:8000/api/feature_data/${this.fileName}/${this.selectedFeature}`;
+
+    this.http.get<any>(base).subscribe({
+      next: (res) => {
+        const data = res.feature_data[0];
         this.featureDataKeys = Object.keys(data);
         this.featureDataValues = Object.values(data);
-
         this.SDS.setFeatureData(this.featureDataKeys);
       },
-      error: (error) => {
-        console.error('Error fetching data: ', error);
-      },
+      error: (err) => console.error('Feature data error', err),
     });
 
-    this.http.get<any>(`${api_url + this.selectedFeature}/unique`).subscribe({
-      next: (response) => {
-        this.chart_data = response.result.count;
-        this.chart_data_labels = Object.keys(this.chart_data);
-        this.chart_data_dataset = Object.values(this.chart_data);
-        console.log('this.chart_data: ', this.chart_data);
-        this.initChart();
+    this.http.get<any>(`${base}/unique`).subscribe({
+      next: (res) => {
+        const data = res.result.count;
+        this.chartData = this.prepareChart(data);
       },
-      error: (error) => {
-        console.error('Error fetching data: ', error);
+      error: (err) => console.error('Unique values error', err),
+    });
+
+    this.http.get<any>(`${base}/missing`).subscribe({
+      next: (res) => {
+        this.missingChartData = this.prepareChart(res.result);
       },
+      error: (err) => console.error('Missing values error', err),
     });
   }
 
-  private tryPushMetadata() {
+  private pushMetadata(): void {
     if (this.filedata && this.features.length > 0) {
-      this.metadata = [];
-      this.metadata.push({
-        name: this.filedata.name,
-        size: this.filedata.size,
-        type: this.filedata.type,
-        num_of_variables: this.features.length,
-      });
-
+      this.metadata = [
+        {
+          name: this.filedata.name,
+          size: this.filedata.size,
+          type: this.filedata.type,
+          num_of_variables: this.features.length,
+        },
+      ];
       this.updateFeatureData();
-
       this.cdr.detectChanges();
     }
   }
 
-  private initChart() {
-    if (isPlatformBrowser(this.platformId)) {
-      const documentStyle = getComputedStyle(document.documentElement);
-      const textColor = documentStyle.getPropertyValue('--text-color');
-      const textColorSecondary = documentStyle.getPropertyValue(
-        '--p-text-muted-color'
-      );
+  private prepareChart(data: Record<string, any>): any {
+    const labels = Object.keys(data);
+    const values = Object.values(data);
+    const documentStyle = getComputedStyle(document.documentElement);
+    const textColor = documentStyle.getPropertyValue('--text-color');
+    const textColorSecondary = documentStyle.getPropertyValue(
+      '--p-text-muted-color'
+    );
 
-      this.chart_data = {
-        labels: this.chart_data_labels,
-        datasets: [
-          {
-            data: this.chart_data_dataset,
-          },
-        ],
-      };
+    const chart = {
+      labels,
+      datasets: [{ data: values }],
+    };
 
-      if (this.chart_data_labels.length <= 5) {
-        this.options = {
-          plugins: {
-            legend: {
-              labels: {
-                usePointStyle: true,
-                color: textColor,
+    const options =
+      labels.length <= 5
+        ? {
+            plugins: {
+              legend: {
+                labels: { usePointStyle: true, color: textColor },
               },
             },
-          },
-        };
-      } else if (this.chart_data_labels.length <= 50) {
-        this.options = {
-          indexAxis: 'y',
-          maintainAspectRatio: false,
-          aspectRatio: 0.8,
-          plugins: {
-            legend: {
-              labels: {
-                color: textColor,
+          }
+        : {
+            indexAxis: 'y',
+            maintainAspectRatio: false,
+            aspectRatio: 0.8,
+            plugins: {
+              legend: {
+                labels: { color: textColor },
               },
             },
-          },
-          scales: {
-            x: {
-              ticks: {
-                color: textColorSecondary,
-                font: {
-                  weight: 500,
-                },
+            scales: {
+              x: {
+                ticks: { color: textColorSecondary },
+                grid: { drawBorder: false },
               },
-              grid: {
-                drawBorder: false,
+              y: {
+                ticks: { color: textColorSecondary },
+                grid: { drawBorder: false },
               },
             },
-            y: {
-              ticks: {
-                color: textColorSecondary,
-              },
-              grid: {
-                drawBorder: false,
-              },
-            },
-          },
-        };
-      }
+          };
 
-      this.cdr.markForCheck();
-    }
+    this.chartOptions = options;
+    return chart;
   }
 }

@@ -29,33 +29,41 @@
 }
 
 <div style="display: grid; grid-template-columns: 1fr 1fr">
-  <p-card header="Feature Data" [style]="{ margin: '2rem' }">
-    <p-select
-      [options]="features"
-      [(ngModel)]="selectedFeature"
-      placeholder="Select a Feature"
-      [style]="{ margin: '1rem 0' }"
-      (onChange)="updateFeatureData()"
-    >
-    </p-select>
-    <p-table [value]="featureDataKeys">
-      <ng-template #body let-item let-rowIndex="rowIndex">
-        <tr>
-          <td class="featuredata-key">{{ item | uppercase }}</td>
-          <td>{{ featureDataValues[rowIndex] }}</td>
-        </tr>
-      </ng-template>
-    </p-table>
-  </p-card>
-  <p-card header="Feature Data Unique Values" [style]="{ margin: '2rem' }">
-    @if (chart_data_labels && chart_data_labels.length <= 5) {
-    <p-chart
-      type="pie"
-      [data]="chart_data"
-      [options]="options"
-      class="w-full md:w-[30rem]"
-    />} @else if(chart_data_labels && chart_data_labels.length <= 50) {
-    <p-chart type="bar" [data]="chart_data" [options]="options" />
+  <div>
+    <p-card header="Feature Data" [style]="{ margin: '0 2rem' }">
+      <p-select
+        [options]="features"
+        [(ngModel)]="selectedFeature"
+        placeholder="Select a Feature"
+        [style]="{ margin: '1rem 0' }"
+        (onChange)="updateFeatureData()"
+      >
+      </p-select>
+      <p-table [value]="featureDataKeys">
+        <ng-template #body let-item let-rowIndex="rowIndex">
+          <tr>
+            <td class="featuredata-key">{{ item | uppercase }}</td>
+            <td>{{ featureDataValues[rowIndex] }}</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </p-card>
+    <p-card header="Missing Values" [style]="{ margin: '2rem' }">
+      <p-chart
+        type="pie"
+        [data]="missingChartData"
+        [options]="missingChartOptions"
+      />
+    </p-card>
+  </div>
+  <p-card
+    header="Feature Data Unique Values"
+    [style]="{ margin: '0 2rem 0 0' }"
+  >
+    @if (chartData && chartData.labels.length <= 5) {
+    <p-chart type="pie" [data]="chartData" [options]="chartOptions" />
+    } @else if(chartData && chartData.labels.length <= 50) {
+    <p-chart type="bar" [data]="chartData" [options]="chartOptions" />
     } @else {
     <p>Too many unique values (>50)</p>
     }

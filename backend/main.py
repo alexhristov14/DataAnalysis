@@ -69,7 +69,8 @@ async def get_specific_feature_data(filename: str, feature: str, data: str):
         if df.empty:
             return JSONResponse(content={"error": "File is empty or not found"}, status_code=404)
         
-        result = get_feature_data_method(df, feature, data).to_dict()
+        result = get_feature_data_method(df, feature, data)
+        result = result.to_dict() if data == 'unique' else result
         
         return JSONResponse(content={"result": result})
 
