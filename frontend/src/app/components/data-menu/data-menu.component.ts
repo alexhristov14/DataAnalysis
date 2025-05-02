@@ -19,19 +19,9 @@ export class DataMenuComponent {
       routerLink: '/home',
     },
     {
-      label: 'Results',
+      label: 'Algorithms',
       icon: 'pi pi-fw pi-chart-line',
-      routerLink: '/results',
-      items: [
-        {
-          label: 'Analysis',
-          routerLink: '/results/analysis',
-        },
-        {
-          label: 'Algorithms',
-          routerLink: '/results/algorithms',
-        },
-      ],
+      routerLink: '/algorithms',
     },
     {
       label: 'Settings',

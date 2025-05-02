@@ -3,12 +3,18 @@ import { SheetShowComponent } from '../sheet-show/sheet-show.component';
 import { CommonModule } from '@angular/common';
 import { FileUploaderComponent } from '../file-uploader/file-uploader.component';
 import { HttpClient } from '@angular/common/http';
+import { AnalysisComponent } from '../analysis/analysis.component';
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
-  imports: [CommonModule, FileUploaderComponent, SheetShowComponent],
+  imports: [
+    CommonModule,
+    FileUploaderComponent,
+    SheetShowComponent,
+    AnalysisComponent,
+  ],
   standalone: true,
 })
 export class HomeComponent {

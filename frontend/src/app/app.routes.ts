@@ -7,9 +7,7 @@ import { SettingsComponent } from './components/settings/settings.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
-  { path: 'results', redirectTo: 'results/analysis', pathMatch: 'full' },
   { path: 'home', component: HomeComponent },
-  { path: 'results/analysis', component: AnalysisComponent },
-  { path: 'results/algorithms', component: AlgorithmsComponent },
+  { path: 'algorithms', component: AlgorithmsComponent },
   { path: 'settings', component: SettingsComponent },
 ];

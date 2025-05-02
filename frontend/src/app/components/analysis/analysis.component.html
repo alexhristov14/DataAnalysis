@@ -1,4 +1,4 @@
-@if (metadata) {
+@if (filedata) { @if (metadata) {
 <div id="metadata-card">
   <p-card header="Meta Data">
     <ng-container>
@@ -47,12 +47,18 @@
       </ng-template>
     </p-table>
   </p-card>
-  <p-card header="Feature Data" [style]="{ margin: '2rem' }">
+  <p-card header="Feature Data Unique Values" [style]="{ margin: '2rem' }">
+    @if (chart_data_labels && chart_data_labels.length <= 5) {
     <p-chart
       type="pie"
       [data]="chart_data"
       [options]="options"
       class="w-full md:w-[30rem]"
-    />
+    />} @else if(chart_data_labels && chart_data_labels.length <= 50) {
+    <p-chart type="bar" [data]="chart_data" [options]="options" />
+    } @else {
+    <p>Too many unique values (>50)</p>
+    }
   </p-card>
 </div>
+}

@@ -47,6 +47,8 @@ export class AnalysisComponent implements AfterViewInit {
   platformId = inject(PLATFORM_ID);
 
   chart_data: any;
+  chart_data_labels: any;
+  chart_data_dataset: any;
   options: any;
 
   @Input() features: string[] = [];
@@ -99,9 +101,11 @@ export class AnalysisComponent implements AfterViewInit {
 
     this.http.get<any>(`${api_url + this.selectedFeature}/unique`).subscribe({
       next: (response) => {
-        this.chart_data = response.result;
-        this.initChart();
+        this.chart_data = response.result.count;
+        this.chart_data_labels = Object.keys(this.chart_data);
+        this.chart_data_dataset = Object.values(this.chart_data);
         console.log('this.chart_data: ', this.chart_data);
+        this.initChart();
       },
       error: (error) => {
         console.error('Error fetching data: ', error);
@@ -129,36 +133,66 @@ export class AnalysisComponent implements AfterViewInit {
     if (isPlatformBrowser(this.platformId)) {
       const documentStyle = getComputedStyle(document.documentElement);
       const textColor = documentStyle.getPropertyValue('--text-color');
+      const textColorSecondary = documentStyle.getPropertyValue(
+        '--p-text-muted-color'
+      );
 
       this.chart_data = {
-        labels: ['A', 'B', 'C'],
+        labels: this.chart_data_labels,
         datasets: [
           {
-            data: [540, 325, 702],
-            backgroundColor: [
-              documentStyle.getPropertyValue('--p-cyan-500'),
-              documentStyle.getPropertyValue('--p-orange-500'),
-              documentStyle.getPropertyValue('--p-gray-500'),
-            ],
-            hoverBackgroundColor: [
-              documentStyle.getPropertyValue('--p-cyan-400'),
-              documentStyle.getPropertyValue('--p-orange-400'),
-              documentStyle.getPropertyValue('--p-gray-400'),
-            ],
+            data: this.chart_data_dataset,
           },
         ],
       };
 
-      this.options = {
-        plugins: {
-          legend: {
-            labels: {
-              usePointStyle: true,
-              color: textColor,
+      if (this.chart_data_labels.length <= 5) {
+        this.options = {
+          plugins: {
+            legend: {
+              labels: {
+                usePointStyle: true,
+                color: textColor,
+              },
             },
           },
-        },
-      };
+        };
+      } else if (this.chart_data_labels.length <= 50) {
+        this.options = {
+          indexAxis: 'y',
+          maintainAspectRatio: false,
+          aspectRatio: 0.8,
+          plugins: {
+            legend: {
+              labels: {
+                color: textColor,
+              },
+            },
+          },
+          scales: {
+            x: {
+              ticks: {
+                color: textColorSecondary,
+                font: {
+                  weight: 500,
+                },
+              },
+              grid: {
+                drawBorder: false,
+              },
+            },
+            y: {
+              ticks: {
+                color: textColorSecondary,
+              },
+              grid: {
+                drawBorder: false,
+              },
+            },
+          },
+        };
+      }
+
       this.cdr.markForCheck();
     }
   }
