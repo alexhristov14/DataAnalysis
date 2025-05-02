@@ -15,6 +15,9 @@ export class SharedDataService<T> {
   private formattedData = new BehaviorSubject<T | null>(null);
   formattedData$ = this.formattedData.asObservable();
 
+  private featureData = new BehaviorSubject<string[] | null>(null);
+  featureData$ = this.featureData.asObservable();
+
   private table: CSVTableFormat | null = null;
 
   setData(data: T): void {
@@ -23,6 +26,14 @@ export class SharedDataService<T> {
 
   getData(): T | null {
     return this.dataSubject.getValue();
+  }
+
+  setFeatureData(data: string[]) {
+    this.featureData.next(data);
+  }
+
+  getFeatureData(): string[] | null {
+    return this.featureData.getValue();
   }
 
   getFormattedData(): CSVTableFormat | null {

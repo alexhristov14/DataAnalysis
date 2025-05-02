@@ -3,7 +3,7 @@
   <p-card header="Meta Data">
     <ng-container>
       <p-table [value]="metadata">
-        <ng-template #body>
+        <ng-template #body let-item>
           <tr>
             <td class="metadata-key">{{ "name" | uppercase }}</td>
             <td>{{ metadata[0].name }}</td>
@@ -28,14 +28,31 @@
 </div>
 }
 
-<p-card header="Missing Values" [style]="{ margin: '2rem' }">
-  <p-select
-    [options]="features"
-    [(ngModel)]="selectedFeature"
-    placeholder="Select a Feature"
-  >
-    <p-table [value]="featuredata">
-      <ng-template #body></ng-template>
+<div style="display: grid; grid-template-columns: 1fr 1fr">
+  <p-card header="Feature Data" [style]="{ margin: '2rem' }">
+    <p-select
+      [options]="features"
+      [(ngModel)]="selectedFeature"
+      placeholder="Select a Feature"
+      [style]="{ margin: '1rem 0' }"
+      (onChange)="updateFeatureData()"
+    >
+    </p-select>
+    <p-table [value]="featureDataKeys">
+      <ng-template #body let-item let-rowIndex="rowIndex">
+        <tr>
+          <td class="featuredata-key">{{ item | uppercase }}</td>
+          <td>{{ featureDataValues[rowIndex] }}</td>
+        </tr>
+      </ng-template>
     </p-table>
-  </p-select>
-</p-card>
+  </p-card>
+  <p-card header="Feature Data" [style]="{ margin: '2rem' }">
+    <p-chart
+      type="pie"
+      [data]="chart_data"
+      [options]="options"
+      class="w-full md:w-[30rem]"
+    />
+  </p-card>
+</div>

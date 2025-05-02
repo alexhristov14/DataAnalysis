@@ -77,12 +77,18 @@ def generate_feature_analysis_data(df: pd.DataFrame, feature: str) -> pd.DataFra
         'distinct_percent': [f"{len(df.unique()) / len(df) * 100:.2f}%"],
         'missing': [df.isna().sum()],
         'missing_percent': [f"{df.isna().sum() / len(df) * 100:.2f}%"],
-        'maximum': [df.max()],
         'minimum': [df.min()],
-        'median': [df.median()],
         'q1': [df.quantile(0.25)],
+        'median': [df.median()],
         'q3': [df.quantile(0.75)],
+        'maximum': [df.max()],
         'mean': [df.mean()],
     })
 
     return result
+
+def get_feature_data_method(df: pd.DataFrame, feature: str, data: str) -> pd.DataFrame:
+    if data == 'unique':
+        result = pd.DataFrame(df[feature].value_counts())
+        print(result)
+        return result

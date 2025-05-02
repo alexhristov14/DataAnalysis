@@ -2,7 +2,7 @@ from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import shutil
-from data import load_data, five_number_summary, generate_feature_analysis_data, get_features, correlation_matrix, missing_values_summary, data_types_summary, unique_values_summary, categorical_summary, numerical_summary
+from data import load_data, five_number_summary, get_feature_data_method, generate_feature_analysis_data, get_features, correlation_matrix, missing_values_summary, data_types_summary, unique_values_summary, categorical_summary, numerical_summary
 
 app = FastAPI()
 
@@ -51,7 +51,6 @@ async def get_file(filename: str):
 async def get_feature_data(filename: str, feature: str):
     try:
         df = load_data(f"./uploads/{filename}")
-        print(len(df))
 
         if df.empty:
             return JSONResponse(content={"error": "File is empty or not found"}, status_code=404)
@@ -61,3 +60,19 @@ async def get_feature_data(filename: str, feature: str):
         return JSONResponse(content={'feature_data': feature_data})
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
+    
+@app.get("/api/feature_data/{filename}/{feature}/{data}")
+async def get_specific_feature_data(filename: str, feature: str, data: str):
+    try:
+        df = load_data(f"./uploads/{filename}")
+
+        if df.empty:
+            return JSONResponse(content={"error": "File is empty or not found"}, status_code=404)
+        
+        result = get_feature_data_method(df, feature, data).to_dict()
+        
+        return JSONResponse(content={"result": result})
+
+    except Exception as e:    
+        return JSONResponse(content={"error": str(e)}, status_code=500)
+    

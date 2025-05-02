@@ -6,6 +6,7 @@ import {
   OnInit,
   PLATFORM_ID,
   signal,
+  AfterViewInit,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
@@ -23,27 +24,6 @@ interface metaData {
   size: number;
   type: string;
   num_of_variables: number;
-  // unique_vals_per_col: number;
-  // number_of_missing_vals_per_col: number;
-  // col_with_most_nulls: string;
-}
-
-interface featureData {
-  distinct: number;
-  disting_percent: string;
-  missing: number;
-  missing_percent: string;
-  minimum: number;
-  q1: number;
-  median: number;
-  q3: number;
-  maximum: number;
-  // zeros: number;
-  // zeros_percent: string;
-  // negative: number;
-  // negative_percent: string;
-  mean: number;
-  // memory_size: number;
 }
 
 @Component({
@@ -60,9 +40,14 @@ interface featureData {
     ChartModule,
   ],
 })
-export class AnalysisComponent {
+export class AnalysisComponent implements AfterViewInit {
   metadata: metaData[] = [];
-  featuredata: featureData[] = [];
+  featureDataKeys: string[] = [];
+  featureDataValues: any[] = [];
+  platformId = inject(PLATFORM_ID);
+
+  chart_data: any;
+  options: any;
 
   @Input() features: string[] = [];
   @Input() selectedFeature: string = '';
@@ -88,24 +73,40 @@ export class AnalysisComponent {
       .subscribe({
         next: (response) => {
           this.features = response.features;
+          this.selectedFeature = this.features[0];
           this.tryPushMetadata();
         },
         error: (error) => {
           console.error('Error fetching data:', error);
         },
       });
+  }
 
-    this.http
-      .get<any>('http://localhost:8000/api/feature_data/train.csv/store_nbr')
-      .subscribe({
-        next: (response) => {
-          this.featuredata = response;
-          console.log('Feature Data: ', this.featuredata);
-        },
-        error: (error) => {
-          console.error('Error fetching data: ', error);
-        },
-      });
+  updateFeatureData() {
+    const api_url = `http://localhost:8000/api/feature_data/train.csv/`;
+    this.http.get<any>(`${api_url + this.selectedFeature}`).subscribe({
+      next: (response) => {
+        const data = response.feature_data[0];
+        this.featureDataKeys = Object.keys(data);
+        this.featureDataValues = Object.values(data);
+
+        this.SDS.setFeatureData(this.featureDataKeys);
+      },
+      error: (error) => {
+        console.error('Error fetching data: ', error);
+      },
+    });
+
+    this.http.get<any>(`${api_url + this.selectedFeature}/unique`).subscribe({
+      next: (response) => {
+        this.chart_data = response.result;
+        this.initChart();
+        console.log('this.chart_data: ', this.chart_data);
+      },
+      error: (error) => {
+        console.error('Error fetching data: ', error);
+      },
+    });
   }
 
   private tryPushMetadata() {
@@ -118,13 +119,47 @@ export class AnalysisComponent {
         num_of_variables: this.features.length,
       });
 
-      this.featuredata = [];
-
-      // this.featuredata.push({
-
-      // })
+      this.updateFeatureData();
 
       this.cdr.detectChanges();
+    }
+  }
+
+  private initChart() {
+    if (isPlatformBrowser(this.platformId)) {
+      const documentStyle = getComputedStyle(document.documentElement);
+      const textColor = documentStyle.getPropertyValue('--text-color');
+
+      this.chart_data = {
+        labels: ['A', 'B', 'C'],
+        datasets: [
+          {
+            data: [540, 325, 702],
+            backgroundColor: [
+              documentStyle.getPropertyValue('--p-cyan-500'),
+              documentStyle.getPropertyValue('--p-orange-500'),
+              documentStyle.getPropertyValue('--p-gray-500'),
+            ],
+            hoverBackgroundColor: [
+              documentStyle.getPropertyValue('--p-cyan-400'),
+              documentStyle.getPropertyValue('--p-orange-400'),
+              documentStyle.getPropertyValue('--p-gray-400'),
+            ],
+          },
+        ],
+      };
+
+      this.options = {
+        plugins: {
+          legend: {
+            labels: {
+              usePointStyle: true,
+              color: textColor,
+            },
+          },
+        },
+      };
+      this.cdr.markForCheck();
     }
   }
 }
