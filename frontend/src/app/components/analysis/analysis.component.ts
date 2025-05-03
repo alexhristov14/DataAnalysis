@@ -18,12 +18,19 @@ import { CommonModule } from '@angular/common';
 import { StepsModule } from 'primeng/steps';
 import { TableModule } from 'primeng/table';
 import { ChartModule } from 'primeng/chart';
+import { AccordionModule } from 'primeng/accordion';
+import { CarouselModule } from 'primeng/carousel';
 
 interface MetaData {
   name: string;
   size: number;
   type: string;
   num_of_variables: number;
+}
+
+interface ChartData {
+  data: Object;
+  options: Object;
 }
 
 @Component({
@@ -39,6 +46,8 @@ interface MetaData {
     StepsModule,
     TableModule,
     ChartModule,
+    AccordionModule,
+    CarouselModule,
   ],
 })
 export class AnalysisComponent implements AfterViewInit {
@@ -51,6 +60,20 @@ export class AnalysisComponent implements AfterViewInit {
 
   missingChartData: any;
   missingChartOptions: any;
+
+  allChartsData: ChartData[] = [];
+  responsiveOptions = [
+    {
+      breakpoint: '1400px',
+      numVisible: 1,
+      numScroll: 1,
+    },
+    {
+      breakpoint: '1199px',
+      numVisible: 1,
+      numScroll: 1,
+    },
+  ];
 
   platformId = inject(PLATFORM_ID);
 
@@ -107,6 +130,15 @@ export class AnalysisComponent implements AfterViewInit {
       next: (res) => {
         const data = res.result.count;
         this.chartData = this.prepareChart(data);
+        if (this.allChartsData.length <= 2) {
+          this.allChartsData.push({
+            data: this.chartData,
+            options: this.chartOptions,
+          });
+        } else {
+          this.allChartsData[0]['data'] = this.chartData;
+          this.allChartsData[0]['options'] = this.chartOptions;
+        }
       },
       error: (err) => console.error('Unique values error', err),
     });
@@ -114,6 +146,15 @@ export class AnalysisComponent implements AfterViewInit {
     this.http.get<any>(`${base}/missing`).subscribe({
       next: (res) => {
         this.missingChartData = this.prepareChart(res.result);
+        if (this.allChartsData.length <= 2) {
+          this.allChartsData.push({
+            data: this.missingChartData,
+            options: this.chartOptions,
+          });
+        } else {
+          this.allChartsData[1]['data'] = this.chartData;
+          this.allChartsData[1]['options'] = this.chartOptions;
+        }
       },
       error: (err) => console.error('Missing values error', err),
     });

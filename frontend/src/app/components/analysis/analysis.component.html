@@ -48,25 +48,31 @@
         </ng-template>
       </p-table>
     </p-card>
-    <p-card header="Missing Values" [style]="{ margin: '2rem' }">
-      <p-chart
-        type="pie"
-        [data]="missingChartData"
-        [options]="missingChartOptions"
-      />
-    </p-card>
   </div>
-  <p-card
-    header="Feature Data Unique Values"
-    [style]="{ margin: '0 2rem 0 0' }"
-  >
-    @if (chartData && chartData.labels.length <= 5) {
-    <p-chart type="pie" [data]="chartData" [options]="chartOptions" />
-    } @else if(chartData && chartData.labels.length <= 50) {
-    <p-chart type="bar" [data]="chartData" [options]="chartOptions" />
-    } @else {
-    <p>Too many unique values (>50)</p>
-    }
+
+  <p-card *ngIf="allChartsData.length" [style]="{ margin: '0 2rem' }">
+    <p-accordion value="0">
+      <p-accordion-panel value="0">
+        <p-accordion-header>Unique Values</p-accordion-header>
+        <p-accordion-content>
+          <p-chart
+            type="pie"
+            [data]="chartData"
+            [options]="chartOptions"
+          ></p-chart>
+        </p-accordion-content>
+      </p-accordion-panel>
+      <p-accordion-panel value="1">
+        <p-accordion-header>Missing Values</p-accordion-header>
+        <p-accordion-content>
+          <p-chart
+            type="pie"
+            [data]="missingChartData"
+            [options]="missingChartOptions"
+          ></p-chart>
+        </p-accordion-content>
+      </p-accordion-panel>
+    </p-accordion>
   </p-card>
 </div>
 }
