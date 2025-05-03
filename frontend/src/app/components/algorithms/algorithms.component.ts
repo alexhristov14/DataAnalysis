@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { SharedDataService } from '../../services/api-handler/shared-data.service';
 import { FormsModule } from '@angular/forms';
@@ -6,9 +6,10 @@ import { SelectModule } from 'primeng/select';
 import { IftaLabelModule } from 'primeng/iftalabel';
 import { TableModule } from 'primeng/table';
 import { CardModule } from 'primeng/card';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgStyle } from '@angular/common';
 import { OrganizationChartModule } from 'primeng/organizationchart';
 import { TreeNode } from 'primeng/api';
+import { HttpClient, HttpParams } from '@angular/common/http';
 
 @Component({
   selector: 'app-algorithms',
@@ -29,6 +30,8 @@ export class AlgorithmsComponent {
   featureDataKeys: string[] | null = [];
 
   selectionAlgorithm!: TreeNode;
+  selectedFeature!: string;
+  filename: string = 'train.csv';
 
   algorithms: TreeNode[] = [
     {
@@ -63,9 +66,26 @@ export class AlgorithmsComponent {
     },
   ];
 
-  constructor(private SDS: SharedDataService<File>) {
+  constructor(private SDS: SharedDataService<File>, private http: HttpClient) {
     this.featureDataKeys = this.SDS.getFeatureData();
+    this.filename = this.SDS.getData()!.name;
   }
 
-  onFeatureClick(feature: string): void {}
+  onFeatureClick(feature: string): void {
+    this.selectedFeature = feature;
+    this.runAlgorithm('linear', this.selectedFeature);
+  }
+
+  runAlgorithm(algo: string, label: string): void {
+    const params = new HttpParams().set('algorithm', algo).set('label', label);
+
+    this.http
+      .get<any>(`http://localhost:8000/run_algo/${this.filename}`, { params })
+      .subscribe({
+        next: (response) => {
+          console.log(response);
+        },
+        error: (err) => console.error('Unique values error', err),
+      });
+  }
 }

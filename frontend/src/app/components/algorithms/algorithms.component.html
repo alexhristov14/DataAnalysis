@@ -1,4 +1,4 @@
-<h1>Algorithms</h1>
+<h1 style="margin-left: 4rem">Algorithms</h1>
 
 <p-organization-chart
   [value]="algorithms"
@@ -6,13 +6,22 @@
   [(selection)]="selectionAlgorithm"
 />
 
-<table
-  class="p-datatable p-component p-datatable-hoverable-rows"
-  style="margin-left: 4rem"
->
-  <tbody class="p-datatable-tbody">
-    <tr *ngFor="let feature of featureDataKeys">
-      <td (click)="onFeatureClick(feature)">{{ feature }}</td>
-    </tr>
-  </tbody>
-</table>
+<div style="display: flex">
+  <div style="margin-left: 4rem">
+    <h3>Click on the desired label</h3>
+    <table class="p-datatable p-component p-datatable-hoverable-rows">
+      <tbody class="p-datatable-tbody">
+        <tr *ngFor="let feature of featureDataKeys; let i = index">
+          <td
+            (click)="onFeatureClick(feature)"
+            [ngStyle]="{
+              backgroundColor: feature === selectedFeature ? '#064e3b' : ''
+            }"
+          >
+            {{ feature }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

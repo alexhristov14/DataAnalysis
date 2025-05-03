@@ -1,5 +1,6 @@
 import pandas as pd
 from typing import List
+from sklearn.linear_model import LinearRegression
 
 def load_data(file_path: str) -> pd.DataFrame:
     """Load data from a CSV file into a DataFrame."""
@@ -97,3 +98,16 @@ def get_feature_data_method(df: pd.DataFrame, feature: str, data: str) -> pd.Dat
         not_missing_count = df[feature].notna().sum()
         result = {"missing": int(missing_count), "not_missing": int(not_missing_count)}
         return result
+    
+
+def run_linear_regression(df: pd.DataFrame, label: str) -> int:
+    df.columns = map(str.lower, df.columns)
+    df.columns = [col.replace(' ', '_') for col in df.columns]
+    
+    label = label.strip()
+    X = df.copy()[df.select_dtypes(include=['int64', 'float64']).columns]
+    y = X.pop(label)
+    
+    reg = LinearRegression().fit(X,y)
+
+    return reg.score(X, y)

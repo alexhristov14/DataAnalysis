@@ -111,7 +111,7 @@ export class AnalysisComponent implements AfterViewInit {
         const data = res.feature_data[0];
         this.featureDataKeys = Object.keys(data);
         this.featureDataValues = Object.values(data);
-        this.SDS.setFeatureData(this.featureDataKeys);
+        this.SDS.setFeatureData(this.features);
       },
       error: (err) => console.error('Feature data error', err),
     });
