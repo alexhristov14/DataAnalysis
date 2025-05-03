@@ -10,6 +10,7 @@ import { CommonModule, NgStyle } from '@angular/common';
 import { OrganizationChartModule } from 'primeng/organizationchart';
 import { TreeNode } from 'primeng/api';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-algorithms',
@@ -32,6 +33,7 @@ export class AlgorithmsComponent {
   selectionAlgorithm!: TreeNode;
   selectedFeature!: string;
   filename: string = 'train.csv';
+  r_score!: number;
 
   algorithms: TreeNode[] = [
     {
@@ -66,7 +68,12 @@ export class AlgorithmsComponent {
     },
   ];
 
-  constructor(private SDS: SharedDataService<File>, private http: HttpClient) {
+  constructor(
+    private SDS: SharedDataService<File>,
+    private http: HttpClient,
+    private router: Router
+  ) {
+    if (!this.SDS.getData()) this.router.navigate(['/home']);
     this.featureDataKeys = this.SDS.getFeatureData();
     this.filename = this.SDS.getData()!.name;
   }
@@ -77,13 +84,14 @@ export class AlgorithmsComponent {
   }
 
   runAlgorithm(algo: string, label: string): void {
+    label = label.toLowerCase().replace(' ', '_');
     const params = new HttpParams().set('algorithm', algo).set('label', label);
 
     this.http
       .get<any>(`http://localhost:8000/run_algo/${this.filename}`, { params })
       .subscribe({
         next: (response) => {
-          console.log(response);
+          this.r_score = response['r-score'];
         },
         error: (err) => console.error('Unique values error', err),
       });
