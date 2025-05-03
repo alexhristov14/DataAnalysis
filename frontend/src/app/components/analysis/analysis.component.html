@@ -56,10 +56,15 @@
         <p-accordion-header>Unique Values</p-accordion-header>
         <p-accordion-content>
           <p-chart
+            *ngIf="chartData.labels.length <= 5; else barChart"
             type="pie"
             [data]="chartData"
             [options]="chartOptions"
           ></p-chart>
+          <ng-template #barChart>
+            <p-chart type="bar" [data]="chartData" [options]="chartOptions" />
+          </ng-template>
+          <!-- <ng-template #tooMany></ng-template> -->
         </p-accordion-content>
       </p-accordion-panel>
       <p-accordion-panel value="1">

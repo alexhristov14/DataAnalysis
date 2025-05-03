@@ -26,6 +26,8 @@ interface MetaData {
   size: number;
   type: string;
   num_of_variables: number;
+  // total_nb_rows: number;
+  // encoding: string;
 }
 
 interface ChartData {
@@ -62,18 +64,6 @@ export class AnalysisComponent implements AfterViewInit {
   missingChartOptions: any;
 
   allChartsData: ChartData[] = [];
-  responsiveOptions = [
-    {
-      breakpoint: '1400px',
-      numVisible: 1,
-      numScroll: 1,
-    },
-    {
-      breakpoint: '1199px',
-      numVisible: 1,
-      numScroll: 1,
-    },
-  ];
 
   platformId = inject(PLATFORM_ID);
 
@@ -194,7 +184,7 @@ export class AnalysisComponent implements AfterViewInit {
         ? {
             plugins: {
               legend: {
-                labels: { usePointStyle: true, color: textColor },
+                display: false,
               },
             },
           }

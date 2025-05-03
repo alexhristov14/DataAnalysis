@@ -1,27 +1,28 @@
 @if (table && table.columns && table.rows && table.name) {
-<h1>{{ table.name }}</h1>
-<p-table
-  [showGridlines]="true"
-  [paginator]="true"
-  [rows]="10"
-  [columns]="table.columns"
-  [value]="table.rows"
-  [tableStyle]="{ 'min-width': '50rem' }"
->
-  <ng-template #header let-columns>
-    <tr>
-      <th *ngFor="let col of columns">
-        {{ col }}
-      </th>
-    </tr>
-  </ng-template>
-  <ng-template #body let-rowData let-columns="columns">
-    <tr>
-      <td *ngFor="let col of columns">
-        {{ rowData[col] }}
-      </td>
-    </tr>
-  </ng-template>
-</p-table>
-
+<div style="margin: 2rem">
+  <h1>{{ table.name }}</h1>
+  <p-table
+    [showGridlines]="true"
+    [paginator]="true"
+    [rows]="10"
+    [columns]="table.columns"
+    [value]="table.rows"
+    [tableStyle]="{ 'min-width': '50rem' }"
+  >
+    <ng-template #header let-columns>
+      <tr>
+        <th *ngFor="let col of columns">
+          {{ col }}
+        </th>
+      </tr>
+    </ng-template>
+    <ng-template #body let-rowData let-columns="columns">
+      <tr>
+        <td *ngFor="let col of columns">
+          {{ rowData[col] }}
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
 }

@@ -1,54 +1,18 @@
 <h1>Algorithms</h1>
-@if (featureDataKeys) {
-<p-multiselect
-  [options]="featureDataKeys"
-  [(ngModel)]="selectVariables"
-  placeholder="Choose your variables"
-></p-multiselect>
-}
 
-<div style="display: flex; flex-direction: column">
-  <div>
-    <p-radiobutton
-      name="type"
-      value="regression"
-      [(ngModel)]="algorithm_category"
-      inputId="cat1"
-    ></p-radiobutton>
-    <label for="cat1">
-      📈 Regression (Linear, Ridge, Lasso, Decision Tree, etc.)</label
-    >
-  </div>
+<p-organization-chart
+  [value]="algorithms"
+  selectionMode="single"
+  [(selection)]="selectionAlgorithm"
+/>
 
-  <div>
-    <p-radiobutton
-      name="type"
-      value="classification"
-      [(ngModel)]="algorithm_category"
-      inputId="cat2"
-    ></p-radiobutton>
-    <label for="cat2">
-      🔍 Classification (Logistic, SVM, KNN, Random Forest, etc.)</label
-    >
-  </div>
-
-  <div>
-    <p-radiobutton
-      name="type"
-      value="clustering"
-      [(ngModel)]="algorithm_category"
-      inputId="cat3"
-    ></p-radiobutton>
-    <label for="cat3"> 🧱 Clustering (K-Means, DBSCAN, Hierarchical)</label>
-  </div>
-
-  <div>
-    <p-radiobutton
-      name="type"
-      value="dimensionality reduction"
-      [(ngModel)]="algorithm_category"
-      inputId="cat1"
-    ></p-radiobutton>
-    <label for="cat1"> 🔬 Dimensionality Reduction (PCA, t-SNE, UMAP)</label>
-  </div>
-</div>
+<table
+  class="p-datatable p-component p-datatable-hoverable-rows"
+  style="margin-left: 4rem"
+>
+  <tbody class="p-datatable-tbody">
+    <tr *ngFor="let feature of featureDataKeys">
+      <td (click)="onFeatureClick(feature)">{{ feature }}</td>
+    </tr>
+  </tbody>
+</table>
