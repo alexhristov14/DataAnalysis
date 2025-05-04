@@ -57,15 +57,13 @@ export class AnalysisComponent implements AfterViewInit {
   featureDataKeys: string[] = [];
   featureDataValues: any[] = [];
 
+  allChartsData: ChartData[] = [];
   chartData: any;
+  missingChartData: any;
   chartOptions: any;
 
-  missingChartData: any;
-  missingChartOptions: any;
-
-  allChartsData: ChartData[] = [];
-
-  platformId = inject(PLATFORM_ID);
+  corrMatrix: number[][] = [];
+  corrMatrixFeatures: string[] = [];
 
   @Input() features: string[] = [];
   @Input() selectedFeature: string = '';
@@ -95,6 +93,12 @@ export class AnalysisComponent implements AfterViewInit {
       .get<any>(`http://localhost:8000/api/uploads/${this.fileName}`)
       .subscribe({
         next: (res) => {
+          for (let i = 0; i < res.correlation.length; i++) {
+            this.corrMatrix.push(
+              Object.values(res.correlation[i]).splice(1) as number[]
+            );
+            this.corrMatrixFeatures.push(res.correlation[i]['Feature']);
+          }
           this.features = res.features;
           this.selectedFeature = this.features[0];
           this.pushMetadata();

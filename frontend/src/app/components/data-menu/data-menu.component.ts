@@ -23,10 +23,11 @@ export class DataMenuComponent {
       icon: 'pi pi-fw pi-chart-line',
       routerLink: '/algorithms',
     },
-    {
-      label: 'Settings',
-      routerLink: '/settings',
-    },
+    // TODO: Settings
+    // {
+    //   label: 'Settings',
+    //   routerLink: '/settings',
+    // },
   ];
 
   onFocus(event: Event) {
