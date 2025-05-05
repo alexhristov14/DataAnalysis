@@ -1,29 +1,46 @@
-<h1 style="margin-left: 4rem">Algorithms</h1>
+<div class="layout">
+  <!-- Left: Draggable Feature Cards -->
+  <div class="card-column">
+    <h3>Features</h3>
+    <div
+      *ngFor="let card of cards"
+      class="draggable"
+      cdkDrag
+      [cdkDragFreeDragPosition]="{ x: card.x, y: card.y }"
+      (cdkDragEnded)="onDragEnd($event, card)"
+    >
+      <p-card [header]="card.content"> </p-card>
+    </div>
+  </div>
 
-<p-organization-chart
-  [value]="algorithms"
-  selectionMode="single"
-  [(selection)]="selectionAlgorithm"
-/>
+  <!-- Middle: Draggable Algorithm Cards -->
+  <div class="card-column">
+    <h3>Algorithms</h3>
+    <div
+      *ngFor="let algo_card of algorithms_cards"
+      class="draggable"
+      cdkDrag
+      [cdkDragFreeDragPosition]="{ x: algo_card.x, y: algo_card.y }"
+      (cdkDragEnded)="onDragEnd($event, algo_card)"
+    >
+      <p-card [header]="algo_card.content"></p-card>
+    </div>
+  </div>
 
-<div style="display: flex">
-  <div style="margin-left: 4rem">
-    <h3>Click on the desired label</h3>
-    <table class="p-datatable p-component p-datatable-hoverable-rows">
-      <tbody class="p-datatable-tbody">
-        <tr *ngFor="let feature of featureDataKeys; let i = index">
-          <td
-            (click)="onFeatureClick(feature)"
-            [ngStyle]="{
-              backgroundColor: feature === selectedFeature ? '#064e3b' : ''
-            }"
-          >
-            {{ feature }}
-          </td>
-        </tr>
-      </tbody>
-    </table>
+  <!-- Right: Pipeline Zones -->
+  <div class="pipeline">
+    <div
+      class="drop-zone"
+      *ngFor="let zone of zones"
+      cdkDropList
+      [cdkDropListData]="zone.items"
+      [cdkDropListConnectedTo]="connectedDropLists"
+      (cdkDropListDropped)="onDrop($event, zone)"
+    >
+      <h4>{{ zone.label }}</h4>
+      <div *ngFor="let item of zone.items" class="dropped-card">
+        <p-card [header]="item.content"></p-card>
+      </div>
+    </div>
   </div>
 </div>
-
-<p *ngIf="r_score">{{ r_score }}</p>

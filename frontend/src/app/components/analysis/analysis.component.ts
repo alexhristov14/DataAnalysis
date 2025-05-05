@@ -169,6 +169,30 @@ export class AnalysisComponent implements AfterViewInit {
     }
   }
 
+  correlationToColor(correlation: number): string {
+    const clamped = Math.max(-1, Math.min(1, correlation));
+
+    const NEGATIVE_COLOR = { r: 102, g: 31, b: 43 }; // Dark red
+    const ZERO_COLOR = { r: 45, g: 45, b: 45 }; // Same theming
+    const POSITIVE_COLOR = { r: 31, g: 77, b: 46 }; // Dark green
+
+    let r, g, b;
+
+    if (clamped < 0) {
+      const t = clamped + 1; // [-1, 0] → [0, 1]
+      r = Math.round(NEGATIVE_COLOR.r * (1 - t) + ZERO_COLOR.r * t);
+      g = Math.round(NEGATIVE_COLOR.g * (1 - t) + ZERO_COLOR.g * t);
+      b = Math.round(NEGATIVE_COLOR.b * (1 - t) + ZERO_COLOR.b * t);
+    } else {
+      const t = clamped; // [0, 1]
+      r = Math.round(ZERO_COLOR.r * (1 - t) + POSITIVE_COLOR.r * t);
+      g = Math.round(ZERO_COLOR.g * (1 - t) + POSITIVE_COLOR.g * t);
+      b = Math.round(ZERO_COLOR.b * (1 - t) + POSITIVE_COLOR.b * t);
+    }
+
+    return `rgb(${r}, ${g}, ${b})`;
+  }
+
   private prepareChart(data: Record<string, any>): any {
     const labels = Object.keys(data);
     const values = Object.values(data);

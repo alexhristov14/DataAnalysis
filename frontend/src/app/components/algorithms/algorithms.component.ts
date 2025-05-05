@@ -1,99 +1,92 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
-import { MultiSelectModule } from 'primeng/multiselect';
+import { Component, OnInit } from '@angular/core';
+import { DragDropModule } from '@angular/cdk/drag-drop';
+import {
+  CdkDragEnd,
+  CdkDragDrop,
+  transferArrayItem,
+} from '@angular/cdk/drag-drop';
 import { SharedDataService } from '../../services/api-handler/shared-data.service';
-import { FormsModule } from '@angular/forms';
-import { SelectModule } from 'primeng/select';
-import { IftaLabelModule } from 'primeng/iftalabel';
-import { TableModule } from 'primeng/table';
 import { CardModule } from 'primeng/card';
-import { CommonModule, NgStyle } from '@angular/common';
-import { OrganizationChartModule } from 'primeng/organizationchart';
-import { TreeNode } from 'primeng/api';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
+let id = 0;
+let algo_id = 0;
+interface Card {
+  id: number;
+  content: string;
+  x: number;
+  y: number;
+}
+
+interface Zone {
+  label: string;
+  id: string;
+  items: any[];
+}
 
 @Component({
   selector: 'app-algorithms',
   templateUrl: './algorithms.component.html',
   styleUrls: ['./algorithms.component.scss'],
-  imports: [
-    MultiSelectModule,
-    FormsModule,
-    SelectModule,
-    IftaLabelModule,
-    TableModule,
-    CardModule,
-    CommonModule,
-    OrganizationChartModule,
-  ],
+  imports: [DragDropModule, CardModule, CommonModule],
 })
-export class AlgorithmsComponent {
-  featureDataKeys: string[] | null = [];
+export class AlgorithmsComponent implements OnInit {
+  features: string[] | null = [];
+  cards: Card[] = [];
 
-  selectionAlgorithm!: TreeNode;
-  selectedFeature!: string;
-  filename: string = 'train.csv';
-  r_score!: number;
+  algorithms: string[] = ['Linear Regression', 'KNN'];
+  algorithms_cards: Card[] = [];
 
-  algorithms: TreeNode[] = [
-    {
-      label: 'Algorithms',
-      expanded: true,
-      children: [
-        {
-          label: 'Regression',
-          expanded: true,
-          children: [
-            {
-              label: 'Linear Regression',
-            },
-            {
-              label: 'Decision Tree Regression',
-            },
-          ],
-        },
-        {
-          label: 'Classification',
-          expanded: true,
-          children: [
-            {
-              label: 'Logistic Regression (Binary)',
-            },
-            {
-              label: 'Decision Tree Classification',
-            },
-          ],
-        },
-      ],
-    },
+  scalers: string[] = ['MinMax', 'Normalizer', 'StandardScaler'];
+
+  zones: Zone[] = [
+    { label: 'Input', id: 'input', items: [] },
+    { label: 'Scaler', id: 'scaler', items: [] },
+    { label: 'ML Algorithm', id: 'ml', items: [] },
+    { label: 'Output', id: 'output', items: [] },
   ];
 
-  constructor(
-    private SDS: SharedDataService<File>,
-    private http: HttpClient,
-    private router: Router
-  ) {
-    if (!this.SDS.getData()) this.router.navigate(['/home']);
-    this.featureDataKeys = this.SDS.getFeatureData();
-    this.filename = this.SDS.getData()!.name;
+  constructor(private SDS: SharedDataService<File>) {
+    this.features = this.SDS.getFeatureData();
   }
 
-  onFeatureClick(feature: string): void {
-    this.selectedFeature = feature;
-    this.runAlgorithm('linear', this.selectedFeature);
-  }
-
-  runAlgorithm(algo: string, label: string): void {
-    label = label.toLowerCase().replace(' ', '_');
-    const params = new HttpParams().set('algorithm', algo).set('label', label);
-
-    this.http
-      .get<any>(`http://localhost:8000/run_algo/${this.filename}`, { params })
-      .subscribe({
-        next: (response) => {
-          this.r_score = response['r-score'];
-        },
-        error: (err) => console.error('Unique values error', err),
+  ngOnInit(): void {
+    this.features?.forEach((feature) => {
+      this.cards.push({
+        id: id++,
+        content: feature,
+        x: 5,
+        y: 5,
       });
+    });
+
+    this.algorithms.forEach((algo) => {
+      this.algorithms_cards.push({
+        id: algo_id++,
+        content: algo,
+        x: 5,
+        y: 5,
+      });
+    });
+  }
+
+  onDrop(event: CdkDragDrop<any[]>, zone: Zone) {
+    if (event.previousContainer !== event.container) {
+      const item = event.previousContainer.data[event.previousIndex];
+
+      const copiedItem = { ...item };
+      zone.items.splice(event.currentIndex, 0, copiedItem);
+
+      event.previousContainer.data.splice(event.previousIndex, 1);
+    }
+  }
+
+  onDragEnd(event: CdkDragEnd, card: any) {
+    const transform = event.source.getFreeDragPosition();
+    card.x = transform.x;
+    card.y = transform.y;
+  }
+
+  get connectedDropLists() {
+    return this.zones.map((zone) => zone.id);
   }
 }

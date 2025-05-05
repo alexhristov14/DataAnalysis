@@ -112,6 +112,11 @@
                   let colFeature of corrMatrixFeatures;
                   let colIndex = index
                 "
+                [ngStyle]="{
+                  backgroundColor: correlationToColor(
+                    corrMatrix[rowIndex][colIndex]
+                  )
+                }"
               >
                 {{ corrMatrix[rowIndex][colIndex] | number : "1.2-2" }}
               </td>
