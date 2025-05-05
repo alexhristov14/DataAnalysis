@@ -35,7 +35,11 @@ export class FileUploaderComponent {
       const formData = new FormData();
       formData.append('file', file);
 
-      this.http.post('http://localhost:8000/api/upload', formData);
+      this.http
+        .post('http://localhost:8000/api/upload', formData)
+        .subscribe((response) => {
+          window.alert(`Succefully uploaded: ${Object(response).filename}`);
+        });
 
       this.sharedDataService.setData(file);
 

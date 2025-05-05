@@ -108,6 +108,7 @@ export class AnalysisComponent implements AfterViewInit {
   }
 
   updateFeatureData(): void {
+    this.selectedFeature = this.selectedFeature.replace(' ', '_').toLowerCase();
     const base = `http://localhost:8000/api/feature_data/${this.fileName}/${this.selectedFeature}`;
 
     this.http.get<any>(base).subscribe({

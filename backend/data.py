@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from typing import List
 from sklearn.linear_model import LinearRegression
 
@@ -6,6 +7,7 @@ def load_data(file_path: str) -> pd.DataFrame:
     """Load data from a CSV file into a DataFrame."""
     try:
         df = pd.read_csv(file_path)
+        df.columns = [col.replace(' ', '_').lower() for col in df.columns]
         return df
     except Exception as e:
         print(f"Error loading data: {e}")
@@ -71,20 +73,27 @@ def numerical_summary(df: pd.DataFrame) -> pd.DataFrame:
     
     return numerical_summary
 
-def generate_feature_analysis_data(df: pd.DataFrame, feature: str) -> pd.DataFrame:
-    df = df[feature]
-    result = pd.DataFrame(data={
-        'distinct': [len(df.unique())],
-        'distinct_percent': [f"{len(df.unique()) / len(df) * 100:.2f}%"],
-        'missing': [df.isna().sum()],
-        'missing_percent': [f"{df.isna().sum() / len(df) * 100:.2f}%"],
-        'minimum': [df.min()],
-        'q1': [df.quantile(0.25)],
-        'median': [df.median()],
-        'q3': [df.quantile(0.75)],
-        'maximum': [df.max()],
-        'mean': [df.mean()],
+def generate_feature_analysis_data(df, feature):
+    series = df[feature]
+
+    result = pd.DataFrame({
+        'distinct': [series.nunique()],
+        'distinct_percent': [f"{series.nunique() / len(series) * 100:.2f}%"],
+        'missing': [series.isna().sum()],
+        'missing_percent': [f"{series.isna().sum() / len(series) * 100:.2f}%"]
     })
+
+    if np.issubdtype(series.dtype, np.number):
+        stats = pd.DataFrame({
+            'minimum': [series.min()],
+            'q1': [series.quantile(0.25)],
+            'median': [series.median()],
+            'q3': [series.quantile(0.75)],
+            'maximum': [series.max()],
+            'mean': [series.mean()]
+        })
+
+        result = pd.concat([result, stats], axis=1)
 
     return result
 
