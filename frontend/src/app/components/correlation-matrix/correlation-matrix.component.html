@@ -1,0 +1,34 @@
+<ng-container>
+  <p-card>
+    <p-table
+      [value]="corrMatrixFeatures"
+      [scrollable]="true"
+      scrollHeight="400px"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th></th>
+          <th *ngFor="let colFeature of corrMatrixFeatures">
+            {{ colFeature }}
+          </th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-rowFeature let-rowIndex="rowIndex">
+        <tr>
+          <th>{{ rowFeature }}</th>
+          <td
+            *ngFor="let colFeature of corrMatrixFeatures; let colIndex = index"
+            [ngStyle]="{
+              backgroundColor: correlationToColor(
+                corrMatrix[rowIndex][colIndex]
+              )
+            }"
+          >
+            {{ corrMatrix[rowIndex][colIndex] | number : "1.2-2" }}
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+</ng-container>

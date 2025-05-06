@@ -1,0 +1,32 @@
+<ng-container>
+  <p-card *ngIf="allChartsData.length" [style]="{ margin: '0 2rem' }">
+    <p-accordion>
+      <p-accordion-panel value="0">
+        <p-accordion-header>Unique Values</p-accordion-header>
+        <p-accordion-content>
+          <p-chart
+            *ngIf="chartData.labels.length <= 5; else barChart"
+            type="pie"
+            [data]="chartData"
+            [options]="chartOptions"
+            height="10rem"
+          ></p-chart>
+          <ng-template #barChart>
+            <p-chart type="bar" [data]="chartData" [options]="chartOptions" />
+          </ng-template>
+        </p-accordion-content>
+      </p-accordion-panel>
+      <p-accordion-panel value="1">
+        <p-accordion-header>Missing Values</p-accordion-header>
+        <p-accordion-content>
+          <p-chart
+            type="pie"
+            [data]="missingChartData"
+            [options]="chartOptions"
+            height="10rem"
+          ></p-chart>
+        </p-accordion-content>
+      </p-accordion-panel>
+    </p-accordion>
+  </p-card>
+</ng-container>

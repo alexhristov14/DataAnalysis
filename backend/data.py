@@ -97,6 +97,18 @@ def generate_feature_analysis_data(df, feature):
 
     return result
 
+def extra_meta_data(df: pd.DataFrame) -> pd.DataFrame:
+    numerical_features = df.select_dtypes(include=['int64', 'float64']).columns
+    categorical_features = df.select_dtypes(exclude=['int64', 'float64']).columns
+
+    result = pd.DataFrame(data={
+        'number_rows': len(df),
+        'num_categorial_features': len(categorical_features),
+        'num_numerical_features': len(numerical_features)
+    })
+
+    return result
+
 def get_feature_data_method(df: pd.DataFrame, feature: str, data: str) -> pd.DataFrame:
     if data == 'unique':
         result = pd.DataFrame(df[feature].value_counts())

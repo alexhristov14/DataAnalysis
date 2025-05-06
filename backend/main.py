@@ -2,7 +2,7 @@ from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import shutil
-from data import load_data, run_linear_regression, five_number_summary, get_feature_data_method, generate_feature_analysis_data, get_features, correlation_matrix, missing_values_summary, data_types_summary, unique_values_summary, categorical_summary, numerical_summary
+from data import load_data, run_linear_regression, extra_meta_data, five_number_summary, get_feature_data_method, generate_feature_analysis_data, get_features, correlation_matrix, missing_values_summary, data_types_summary, unique_values_summary, categorical_summary, numerical_summary
 
 app = FastAPI()
 
@@ -36,12 +36,14 @@ async def get_file(filename: str):
         five_num_summary = five_number_summary(df).to_dict(orient="records")
         correlation = correlation_matrix(df).to_dict(orient="records")
         missing_values = missing_values_summary(df).to_dict(orient="records")
+        # more_meta_data = extra_meta_data(df).to_dict(orient="records")
 
         return JSONResponse(content={
             "features": features,
             "five_number_summary": five_num_summary,
             "correlation": correlation,
             "missing_values": missing_values,
+            # "meta_data": more_meta_data
         }, status_code=200)
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)

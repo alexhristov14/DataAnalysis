@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, map, Observable, of, tap } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 
 interface CSVTableFormat {
   name: string;
@@ -15,16 +16,18 @@ export class SharedDataService<T> {
   private formattedData = new BehaviorSubject<T | null>(null);
   formattedData$ = this.formattedData.asObservable();
 
-  private featureData = new BehaviorSubject<string[] | null>(null);
+  private featureData = new BehaviorSubject<string[]>([]);
   featureData$ = this.featureData.asObservable();
 
   private table: CSVTableFormat | null = null;
 
-  setData(data: T): void {
+  constructor(private http: HttpClient) {}
+
+  setFileMetadata(data: T): void {
     this.dataSubject.next(data);
   }
 
-  getData(): T | null {
+  getFileMetadata(): T | null {
     return this.dataSubject.getValue();
   }
 
@@ -32,8 +35,31 @@ export class SharedDataService<T> {
     this.featureData.next(data);
   }
 
-  getFeatureData(): string[] | null {
-    return this.featureData.getValue();
+  getFeatureData(filename: string): Observable<string[]> {
+    if (this.featureData) return of(this.featureData.getValue());
+
+    return this.http
+      .get<any>(`http://localhost:8000/api/uploads/${filename}`)
+      .pipe(
+        tap((res) => this.setFeatureData(res.features)),
+        map((res) => res.features)
+      );
+  }
+
+  getUniqueFeatureData(
+    filename: string,
+    selectedFeature: string
+  ): Observable<any> {
+    const base = `http://localhost:8000/api/feature_data/${filename}/${selectedFeature}`;
+    return this.http.get<any>(`${base}/unique`);
+  }
+
+  getMissingFeatureData(
+    filename: string,
+    selectedFeature: string
+  ): Observable<any> {
+    const base = `http://localhost:8000/api/feature_data/${filename}/${selectedFeature}`;
+    return this.http.get<any>(`${base}/missing`);
   }
 
   getFormattedData(): CSVTableFormat | null {

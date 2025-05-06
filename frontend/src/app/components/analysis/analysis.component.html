@@ -52,78 +52,12 @@
 
   <div style="display: flex; flex-direction: column">
     <div>
-      <p-card *ngIf="allChartsData.length" [style]="{ margin: '0 2rem' }">
-        <p-accordion>
-          <p-accordion-panel value="0">
-            <p-accordion-header>Unique Values</p-accordion-header>
-            <p-accordion-content>
-              <p-chart
-                *ngIf="chartData.labels.length <= 5; else barChart"
-                type="pie"
-                [data]="chartData"
-                [options]="chartOptions"
-                height="10rem"
-              ></p-chart>
-              <ng-template #barChart>
-                <p-chart
-                  type="bar"
-                  [data]="chartData"
-                  [options]="chartOptions"
-                />
-              </ng-template>
-              <!-- <ng-template #tooMany></ng-template> -->
-            </p-accordion-content>
-          </p-accordion-panel>
-          <p-accordion-panel value="1">
-            <p-accordion-header>Missing Values</p-accordion-header>
-            <p-accordion-content>
-              <p-chart
-                type="pie"
-                [data]="missingChartData"
-                [options]="chartOptions"
-                height="10rem"
-              ></p-chart>
-            </p-accordion-content>
-          </p-accordion-panel>
-        </p-accordion>
-      </p-card>
+      <app-features-chart
+        [selectedFeature]="selectedFeature"
+      ></app-features-chart>
     </div>
-    <div *ngIf="corrMatrix.length > 0" style="margin: 2rem">
-      <p-card>
-        <p-table
-          [value]="corrMatrixFeatures"
-          [scrollable]="true"
-          scrollHeight="400px"
-        >
-          <ng-template pTemplate="header">
-            <tr>
-              <th></th>
-              <th *ngFor="let colFeature of corrMatrixFeatures">
-                {{ colFeature }}
-              </th>
-            </tr>
-          </ng-template>
-
-          <ng-template pTemplate="body" let-rowFeature let-rowIndex="rowIndex">
-            <tr>
-              <th>{{ rowFeature }}</th>
-              <td
-                *ngFor="
-                  let colFeature of corrMatrixFeatures;
-                  let colIndex = index
-                "
-                [ngStyle]="{
-                  backgroundColor: correlationToColor(
-                    corrMatrix[rowIndex][colIndex]
-                  )
-                }"
-              >
-                {{ corrMatrix[rowIndex][colIndex] | number : "1.2-2" }}
-              </td>
-            </tr>
-          </ng-template>
-        </p-table>
-      </p-card>
+    <div style="margin: 2rem">
+      <app-correlation-matrix></app-correlation-matrix>
     </div>
   </div>
 </div>

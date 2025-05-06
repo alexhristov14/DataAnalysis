@@ -1,25 +1,30 @@
+// Angular Imports
 import {
   Component,
-  inject,
   ChangeDetectorRef,
   Input,
-  OnInit,
-  PLATFORM_ID,
-  signal,
   AfterViewInit,
 } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { SharedDataService } from '../../services/api-handler/shared-data.service';
-import { SelectModule } from 'primeng/select';
-import { CardModule } from 'primeng/card';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+
+// Services
+import { SharedDataService } from '../../services/api-handler/shared-data.service';
+
+// Custom Components
+import { CorrelationMatrixComponent } from '../correlation-matrix/correlation-matrix.component';
+
+// Primeng Modules
 import { StepsModule } from 'primeng/steps';
 import { TableModule } from 'primeng/table';
 import { ChartModule } from 'primeng/chart';
 import { AccordionModule } from 'primeng/accordion';
 import { CarouselModule } from 'primeng/carousel';
+import { SelectModule } from 'primeng/select';
+import { CardModule } from 'primeng/card';
+import { Observable } from 'rxjs';
+import { FeaturesChartComponent } from '../features-chart/features-chart.component';
 
 interface MetaData {
   name: string;
@@ -27,12 +32,9 @@ interface MetaData {
   type: string;
   num_of_variables: number;
   // total_nb_rows: number;
+  // nb_numerical_features: number;
+  // nb_categorical_features: number;
   // encoding: string;
-}
-
-interface ChartData {
-  data: Object;
-  options: Object;
 }
 
 @Component({
@@ -50,6 +52,8 @@ interface ChartData {
     ChartModule,
     AccordionModule,
     CarouselModule,
+    CorrelationMatrixComponent,
+    FeaturesChartComponent,
   ],
 })
 export class AnalysisComponent implements AfterViewInit {
@@ -57,16 +61,8 @@ export class AnalysisComponent implements AfterViewInit {
   featureDataKeys: string[] = [];
   featureDataValues: any[] = [];
 
-  allChartsData: ChartData[] = [];
-  chartData: any;
-  missingChartData: any;
-  chartOptions: any;
-
-  corrMatrix: number[][] = [];
-  corrMatrixFeatures: string[] = [];
-
-  @Input() features: string[] = [];
-  @Input() selectedFeature: string = '';
+  features: string[] = [];
+  selectedFeature: string = '';
 
   filedata?: File;
   fileName: string = 'train.csv';
@@ -89,29 +85,16 @@ export class AnalysisComponent implements AfterViewInit {
   }
 
   private loadFeatureList(): void {
-    this.http
-      .get<any>(`http://localhost:8000/api/uploads/${this.fileName}`)
-      .subscribe({
-        next: (res) => {
-          for (let i = 0; i < res.correlation.length; i++) {
-            this.corrMatrix.push(
-              Object.values(res.correlation[i]).splice(1) as number[]
-            );
-            this.corrMatrixFeatures.push(res.correlation[i]['Feature']);
-          }
-          this.features = res.features;
-          this.selectedFeature = this.features[0];
-          this.pushMetadata();
-        },
-        error: (err) => console.error('Feature list error', err),
-      });
+    this.SDS.getFeatureData(this.fileName).subscribe((res) => {
+      this.features = res;
+    });
   }
 
   updateFeatureData(): void {
     this.selectedFeature = this.selectedFeature.replace(' ', '_').toLowerCase();
     const base = `http://localhost:8000/api/feature_data/${this.fileName}/${this.selectedFeature}`;
 
-    this.http.get<any>(base).subscribe({
+    this.get<any>(base).subscribe({
       next: (res) => {
         const data = res.feature_data[0];
         this.featureDataKeys = Object.keys(data);
@@ -119,39 +102,6 @@ export class AnalysisComponent implements AfterViewInit {
         this.SDS.setFeatureData(this.features);
       },
       error: (err) => console.error('Feature data error', err),
-    });
-
-    this.http.get<any>(`${base}/unique`).subscribe({
-      next: (res) => {
-        const data = res.result.count;
-        this.chartData = this.prepareChart(data);
-        if (this.allChartsData.length <= 2) {
-          this.allChartsData.push({
-            data: this.chartData,
-            options: this.chartOptions,
-          });
-        } else {
-          this.allChartsData[0]['data'] = this.chartData;
-          this.allChartsData[0]['options'] = this.chartOptions;
-        }
-      },
-      error: (err) => console.error('Unique values error', err),
-    });
-
-    this.http.get<any>(`${base}/missing`).subscribe({
-      next: (res) => {
-        this.missingChartData = this.prepareChart(res.result);
-        if (this.allChartsData.length <= 2) {
-          this.allChartsData.push({
-            data: this.missingChartData,
-            options: this.chartOptions,
-          });
-        } else {
-          this.allChartsData[1]['data'] = this.chartData;
-          this.allChartsData[1]['options'] = this.chartOptions;
-        }
-      },
-      error: (err) => console.error('Missing values error', err),
     });
   }
 
@@ -170,75 +120,7 @@ export class AnalysisComponent implements AfterViewInit {
     }
   }
 
-  correlationToColor(correlation: number): string {
-    const clamped = Math.max(-1, Math.min(1, correlation));
-
-    const NEGATIVE_COLOR = { r: 102, g: 31, b: 43 }; // Dark red
-    const ZERO_COLOR = { r: 45, g: 45, b: 45 }; // Same theming
-    const POSITIVE_COLOR = { r: 31, g: 77, b: 46 }; // Dark green
-
-    let r, g, b;
-
-    if (clamped < 0) {
-      const t = clamped + 1; // [-1, 0] → [0, 1]
-      r = Math.round(NEGATIVE_COLOR.r * (1 - t) + ZERO_COLOR.r * t);
-      g = Math.round(NEGATIVE_COLOR.g * (1 - t) + ZERO_COLOR.g * t);
-      b = Math.round(NEGATIVE_COLOR.b * (1 - t) + ZERO_COLOR.b * t);
-    } else {
-      const t = clamped; // [0, 1]
-      r = Math.round(ZERO_COLOR.r * (1 - t) + POSITIVE_COLOR.r * t);
-      g = Math.round(ZERO_COLOR.g * (1 - t) + POSITIVE_COLOR.g * t);
-      b = Math.round(ZERO_COLOR.b * (1 - t) + POSITIVE_COLOR.b * t);
-    }
-
-    return `rgb(${r}, ${g}, ${b})`;
-  }
-
-  private prepareChart(data: Record<string, any>): any {
-    const labels = Object.keys(data);
-    const values = Object.values(data);
-    const documentStyle = getComputedStyle(document.documentElement);
-    const textColor = documentStyle.getPropertyValue('--text-color');
-    const textColorSecondary = documentStyle.getPropertyValue(
-      '--p-text-muted-color'
-    );
-
-    const chart = {
-      labels,
-      datasets: [{ data: values }],
-    };
-
-    const options =
-      labels.length <= 5
-        ? {
-            plugins: {
-              legend: {
-                display: false,
-              },
-            },
-          }
-        : {
-            indexAxis: 'y',
-            maintainAspectRatio: false,
-            aspectRatio: 0.8,
-            plugins: {
-              legend: {
-                labels: { color: textColor },
-              },
-            },
-            scales: {
-              x: {
-                ticks: { color: textColorSecondary },
-                grid: { drawBorder: false },
-              },
-              y: {
-                ticks: { color: textColorSecondary },
-                grid: { drawBorder: false },
-              },
-            },
-          };
-
-    this.chartOptions = options;
-    return chart;
+  private get<T>(url: string): Observable<T> {
+    return this.http.get<T>(url);
   }
 }

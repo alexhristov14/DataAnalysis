@@ -38,10 +38,10 @@ export class FileUploaderComponent {
       this.http
         .post('http://localhost:8000/api/upload', formData)
         .subscribe((response) => {
-          window.alert(`Succefully uploaded: ${Object(response).filename}`);
+          console.log(`Succefully uploaded: ${Object(response).filename}`);
         });
 
-      this.sharedDataService.setData(file);
+      this.sharedDataService.setFileMetadata(file);
 
       this.uploadedFiles.push(file);
     }
